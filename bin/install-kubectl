@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+#### PARAMETERS
+
+: ${INSTALL_DIR:="$HOME/bin"}
+
+###############################################################################
+#### INSTALL KUBECTL
+###############################################################################
+
+echo "**** INSTALLING «KUBECTL» ****"
+
+#### GET VERSIONS
+
+LATEST=$( curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt )
+INSTALLED="<NONE>"
+
+if hash kubectl 2>/dev/null
+then
+    INSTALLED=$( kubectl version --client --short | awk '{ print $3 }' )
+fi
+
+#### FETCH IF DIFFERENT
+
+echo
+echo "LATEST: $LATEST"
+echo "INSTALLED: $INSTALLED"
+echo
+
+if [[ "$INSTALLED" !=  "$LATEST" ]]; then
+    echo -e "FETCHING...\n"
+    curl -Lo ${INSTALL_DIR}/kubectl https://storage.googleapis.com/kubernetes-release/release/$LATEST/bin/linux/amd64/kubectl
+    chmod +x ${INSTALL_DIR}/kubectl
+    echo
+fi
+

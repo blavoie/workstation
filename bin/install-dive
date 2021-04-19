@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+#### PARAMETERS
+
+: ${INSTALL_DIR:="$HOME/bin"}
+
+###############################################################################
+#### INSTALL KUBECTL
+###############################################################################
+
+echo "**** INSTALLING «DIVE» ****"
+
+#### GET VERSIONS
+
+LATEST=$( curl --silent https://api.github.com/repos/wagoodman/dive/releases/latest | jq -r '.tag_name' | sed 's/^v//' )
+INSTALLED="<NONE>"
+
+if hash dive 2>/dev/null
+then
+    INSTALLED=$( dive version | awk '{ print $2 }' )
+fi
+
+#### FETCH IF DIFFERENT
+
+echo
+echo "LATEST: $LATEST"
+echo "INSTALLED: $INSTALLED"
+echo
+
+if [[ "$INSTALLED" !=  "$LATEST" ]]; then
+    echo -e "FETCHING...\n"
+    curl -sL https://github.com/wagoodman/dive/releases/download/v${LATEST}/dive_${LATEST}_linux_amd64.tar.gz | tar --directory ${INSTALL_DIR} -xz dive 
+    echo
+fi
+

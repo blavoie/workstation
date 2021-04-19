@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+#### PARAMETERS
+
+: ${INSTALL_DIR:="$HOME/bin"}
+
+###############################################################################
+#### INSTALL FZF
+###############################################################################
+#
+# Needed by «fubectl»
+#
+# NOTE: fzf package exists for fedora but not for all distributions, we simple 
+#       download binary
+#
+
+echo "**** INSTALLING FZF ****"
+
+#### GET VERSIONS
+
+LATEST=$( curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name' )
+INSTALLED="<NONE>"
+
+if hash fzf 2>/dev/null 
+then
+    INSTALLED=$( fzf --version | awk '{ print $1 }' )
+fi
+
+#### FETCH IF DIFFERENT
+
+echo
+echo "LATEST: ${LATEST}"
+echo "INSTALLED: ${INSTALLED}"
+echo
+
+if [[ "${INSTALLED}" != "${LATEST}" ]]; then
+    echo -e "FETCHING...\n"
+    curl -sL https://github.com/junegunn/fzf/releases/download/${LATEST}/fzf-${LATEST}-linux_amd64.tar.gz | tar -xzC ${INSTALL_DIR}
+fi
+
+###############################################################################
+#### INSTALL KREW
+###############################################################################
+#
+# Needed to install «kubectl tree»
+#
+# Original snippet from https://krew.sigs.k8s.io/docs/user-guide/setup/install/:
+#
+# (
+#   set -x; cd "$(mktemp -d)" &&
+#   OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+#   ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+#   curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" &&
+#   tar zxvf krew.tar.gz &&
+#   KREW=./krew-"${OS}_${ARCH}" &&
+#   "$KREW" install krew
+# )
+
+echo "**** INSTALLING «KREW» ****"
+
+#### GET VERSIONS
+
+LATEST=$( curl -s https://api.github.com/repos/kubernetes-sigs/krew/releases/latest | jq -r '.tag_name' )
+INSTALLED="<NONE>"
+
+if hash krew 2>/dev/null 
+then
+    INSTALLED=$( krew version 2>/dev/null | grep GitTag | awk '{ print $2 }' )
+fi
+
+OS="$(uname | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')"
+
+#### FETCH IF DIFFERENT
+
+echo
+echo "LATEST: ${LATEST}"
+echo "INSTALLED: ${INSTALLED}"
+echo
+
+if [[ "${INSTALLED}" !=  "${LATEST}" ]]; then
+  
+  # Download latest krew binary, make it executable and install it
+  echo -e "FETCHING...\n"
+  curl -L https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz \
+    | tar zx --exclude=\./ --no-anchored krew-${OS}_${ARCH} -O > ${INSTALL_DIR}/krew
+  chmod +x ${INSTALL_DIR}/krew
+  echo
+
+fi
+
+krew install krew 2>/dev/null
+
+#### ENSURE THAT KREW IS IN THIS SCRIPT PATH, SHOULD BE ALMOST THE SAME IN .BASHRC ALSO
+
+export PATH="${PATH}:${HOME}/.krew/bin"
+
+###############################################################################
+#### INSTALL KREW PLUGINS
+###############################################################################
+
+#### KUBECTL TREE
+# Needed by «fubectl»
+
+echo "**** INSTALLING «KUBECTL TREE» ****"
+echo
+
+kubectl krew install tree
+
+echo
+
+###############################################################################
+#### INSTALL FUBECTL
+###############################################################################
+
+echo "**** INSTALLING «FUBECTL» ****"
+echo
+
+echo -e "FETCHING...\n"
+curl -Lso ${HOME}/.fubectl.source https://rawgit.com/kubermatic/fubectl/master/fubectl.source
+
+
+###############################################################################
+#### INSTALL K9S
+###############################################################################
+
+echo "**** INSTALLING «K9S» ****"
+
+LATEST=$( curl -s https://api.github.com/repos/derailed/k9s/releases/latest | jq -r '.tag_name' )
+INSTALLED="<NONE>"
+
+if hash k9s 2>/dev/null 
+then
+    INSTALLED=$( k9s version -s | grep Version | awk '{ print $2 }' )
+fi
+
+#### FETCH IF DIFFERENT
+
+echo
+echo "LATEST: ${LATEST}"
+echo "INSTALLED: ${INSTALLED}"
+echo
+
+if [[ "${INSTALLED}" !=  "${LATEST}" ]]; then
+  
+  # Download latest krew binary, make it executable and install it
+  echo -e "FETCHING...\n"
+  curl -Ls https://github.com/derailed/k9s/releases/download/${LATEST}/k9s_Linux_x86_64.tar.gz \
+    | tar zxC ${INSTALL_DIR} k9s
+  echo
+
+fi
+
+

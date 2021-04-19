@@ -1,0 +1,16 @@
+.cache
+.config/google-chrome
+.local/share/containers
+.local/share/JetBrains
+.mozilla
+.thunderbird
+.Trash
+.vagrant
+.vagrant.d
+.wine
+.wine32
+R
+
+# Temporary folders
+tmp
+temp

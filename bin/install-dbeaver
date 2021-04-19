@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+echo "**** INSTALLING «DBEAVER» ****"
+
+#### GET VERSIONS
+
+LATEST=$( curl --silent "https://api.github.com/repos/dbeaver/dbeaver/releases/latest" |  jq -r '.tag_name' )
+INSTALLED=$( rpm  -q --queryformat '%{VERSION}' dbeaver-ce )
+
+#### INSTALL IF NEEDED
+
+echo
+echo "LATEST: $LATEST"
+echo "INSTALLED: $INSTALLED"
+echo
+
+if [[ "$INSTALLED" !=  "$LATEST" ]]; then
+  sudo dnf install -y https://dbeaver.io/files/dbeaver-ce-latest-stable.x86_64.rpm
+fi

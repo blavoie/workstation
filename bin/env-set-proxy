@@ -1,0 +1,12 @@
+#!/usr/bin/echo "Please source this file"
+
+export PROXY=http://192.168.10.85:3128
+
+export HTTP_PROXY=$PROXY
+export HTTPS_PROXY=$PROXY
+export FTP_PROXY=$PROXY 
+
+export proxy=$PROXY
+export http_proxy=$PROXY
+export https_proxy=$PROXY
+export ftp_proxy=$PROXY
